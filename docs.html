@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Azure Avatar Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        a {
+            color: #0078d7;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        ol, ul {
+            margin-bottom: 20px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Documentation for Custom Azure Avatar with Knowledge Base via OpenAI API</h1>
+
+<h2>What is a Custom Text-to-Speech Avatar?</h2>
+<p>For a detailed overview of what a Custom Text-to-Speech Avatar is, please refer to the official 
+<a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech-avatar/what-is-custom-text-to-speech-avatar" target="_blank">Microsoft documentation</a>.</p>
+
+<h2>Previewing an Avatar on Azure Services</h2>
+<ol>
+    <li>
+        <strong>Sign in with a Microsoft Account:</strong>
+        <ul>
+            <li>Visit <a href="https://speech.microsoft.com/portal" target="_blank">Azure Speech Service Portal</a>.</li>
+            <li>Sign in using your Microsoft account credentials.</li>
+        </ul>
+    </li>
+    <li>
+        <strong>Access the Text-to-Speech Avatar Preview:</strong>
+        <ul>
+            <li>Once signed in, navigate to the <strong>Text-to-Speech Avatar Preview</strong> section as shown in the provided image.</li>
+        </ul>
+    </li>
+    <li>
+        <strong>Select an Avatar and Voice:</strong>
+        <ul>
+            <li>Choose from the available avatar forms and voices.</li>
+            <li>Enter the text you want the avatar to speak.</li>
+            <li>The avatar will then speak the provided text, allowing you to preview its capabilities.</li>
+        </ul>
+    </li>
+</ol>
+
+<h2>Implementing Your Own Avatar</h2>
+<p>To implement your own custom avatar, follow these steps:</p>
+
+<h3>Step 1: Establishing API Connections</h3>
+<ol>
+    <li>
+        <strong>Create Azure Resources:</strong>
+        <ul>
+            <li>Go to the <a href="https://portal.azure.com/#home" target="_blank">Azure Portal Home Page</a>.</li>
+            <li>Create a resource for OpenAI called <strong>Azure OpenAI</strong>.</li>
+            <li>Create another resource called <strong>Speech Resource</strong>. Set the region to West US as it is the only region available as of May 2024.</li>
+        </ul>
+    </li>
+    <li>
+        <strong>Create a Custom Model:</strong>
+        <ul>
+            <li>In the Azure OpenAI resource, go to the <strong>Playground</strong>.</li>
+            <li>Navigate to the <strong>Deployments</strong> tab and create a new deployment.</li>
+            <li>Select the model and relevant options, then deploy it.</li>
+            <li>Obtain the Azure OpenAI key for further use.</li>
+        </ul>
+    </li>
+</ol>
+
+<h3>Step 2: Setting Up the Environment</h3>
+<ol>
+    <li>
+        <strong>Set Environment Variables:</strong>
+        <pre><code>set OPENAI_API_KEY=your_openai_api_key</code></pre>
+    </li>
+    <li>
+        <strong>Install Flask and OpenAI Python Library:</strong>
+        <pre><code>pip install flask openai</code></pre>
+        <p>Flask is used to run API calls locally but can be extended for web applications as well.</p>
+    </li>
+    <li>
+        <strong>Run Flask from Command Prompt:</strong>
+        <pre><code>flask run</code></pre>
+        <p>Once Flask is running, you should see the following output in the Command Prompt:</p>
+        <pre><code>
+(base) C:\Users\prana\Desktop\VARE\AzureAvatar>flask run
+ * Serving Flask app 'sampleGPT.py'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit
+ * Restarting with watchdog (windowsapi)
+        </code></pre>
+    </li>
+</ol>
+
+<h3>Step 3: Running the Flask Application</h3>
+<ol>
+    <li>
+        <strong>Create a Flask Application:</strong>
+        <p>Use Flask to create a web application for handling requests to the OpenAI API.</p>
+    </li>
+    <li>
+        <strong>Sample Code:</strong>
+        <pre><code>
+from flask import Flask, request, jsonify
+import openai
+import os
+
+app = Flask(__name__)
+
+# Set up OpenAI API key from environment variable
+openai.api_key = os.getenv('OPENAI_API_KEY')
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    user_text = data.get('text')
+
+    # Call to OpenAI API
+    response = openai.Completion.create(
+        engine="davinci",
+        prompt=user_text,
+        max_tokens=150
+    )
+
+    answer = response.choices[0].text.strip()
+    return jsonify({"response": answer})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+        </code></pre>
+    </li>
+    <li>
+        <strong>Run the Flask Application:</strong>
+        <pre><code>python sampleGPT.py</code></pre>
+        <p>When prompted, write a question such as "Who are you?" or "Tell me about the lab's best projects" and press Enter. The command prompt will fetch and print the API response.</p>
+    </li>
+</ol>
+
+<h2>Using the Custom Avatar on the Website</h2>
+<ol>
+    <li>
+        <strong>Clone the GitHub Repository:</strong>
+        <p>Clone the repository using the following link: <a href="https://github.com/Azure-Samples/cognitive-services-speech-sdk" target="_blank">https://github.com/Azure-Samples/cognitive-services-speech-sdk</a></p>
+    </li>
+    <li>
+        <strong>Navigate to the Avatar Sample Directory:</strong>
+        <p>Go to <a href="https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/js/browser/avatar" target="_blank">Avatar Sample Directory</a></p>
+    </li>
+    <li>
+        <strong>Open the <code>basic.html</code> File:</strong>
+        <p>In the cloned repository, navigate to the directory: <code>cognitive-services-speech-sdk-master\samples\js\browser\avatar</code></p>
+        <p>Open the <code>basic.html</code> file to see the website.</p>
+    </li>
+    <li>
+        <strong>Set Up the Speech SDK:</strong>
+        <p>In the same directory, install or unzip the Speech SDK: <code>SpeechSDK-JavaScript-1.36.0</code>. Find the same or the latest version for free.</p>
+    </li>
+    <li>
+        <strong>Run Flask and Open the Website:</strong>
+        <p>Rerun the Flask application and reopen the website.</p>
+        <p>On the website, set the region to <code>WestUS2</code> and copy-paste the subscription key from the Azure portal resource page. Ensure you use the key from the speech resource specifically.</p>
+        <p>Click on <strong>Start Session</strong> to connect the avatar.</p>
+        <p>Prompt the avatar with text as shown on the website and click <strong>Speak</strong> for it to play.</p>
+    </li>
+</ol>
+
+<p><strong>Note:</strong> This website is the default as given on GitHub. It does not have conversation capabilities. The avatar will only speak what you write in the text box. In the next steps, we will change the HTML and JavaScript code to add our OpenAI model for conversation capabilities.</p>
+
+</body>
+</html>
