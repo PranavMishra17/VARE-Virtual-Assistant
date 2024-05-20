@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrating OpenAI API with Virtual Avatar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        a {
+            color: #0078d7;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        ol, ul {
+            margin-bottom: 20px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+        }
+        .button-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .button-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="button-container">
+    <button onclick="location.href='doc.html'">Back to Documentation Page 1</button>
+</div>
+
+<h1>Integrating OpenAI API with Virtual Avatar</h1>
+
+<h2>Modified `sampleGPT.py`</h2>
+<p>The <code>sampleGPT.py</code> file is used to establish a connection via Flask to the OpenAI API key and fetch the response. Here is the updated code for <code>sampleGPT.py</code>:</p>
+
+<pre><code>import os
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from openai import AzureOpenAI
+
+app = Flask(__name__)
+CORS(app)  # This will enable CORS for all routes
+
+inst = "I am an AI assistant modeled as Professor Mohan Zalake from UIC. My expertise lies in the contents of various UIC webpages, specifically focused on the V-ARE labs. I provide brief overviews and detailed answers about ongoing projects and developments within V-ARE labs, including key team members and details on joining the lab. The lab focuses on technologies like VR and AR to develop virtual healthcare experiences. Students interested in joining can email zalake@uic.edu with a resume/CV, their research interests, and other relevant information. Contact details, lab location, and Dr. Zalake's background in healthcare technologies and virtual reality are also provided. The current projects include EQUITY, B-DONATE, AI-PROMOTORA, digital twins of doctors, and IVORY, focusing on improving healthcare disparities and implementing virtual experiences in medical education and patient care. If a question falls outside this realm, I will respond professionally, indicating my specific role related to Professor Zalake and V-ARE Labs."
+
+# Initialize the AzureOpenAI client with environment variables
+azure_endpoint = "https://testopenaisaturday.openai.azure.com/" 
+api_key = os.getenv("AZURE_OPENAI_API_KEY")
+api_version = "2024-02-15-preview"
+client = AzureOpenAI(azure_endpoint=azure_endpoint, api_key=api_key, api_version=api_version)
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_input = request.json.get('text')
+    response = get_chatgpt_response(user_input)
+    return jsonify({'response': response})
+
+def get_chatgpt_response(text):
+    message_text = [
+        {"role": "system", "content": inst},
+        {"role": "user", "content": text}
+    ]
+
+    try:
+        # Create a chat completion request with the specified model and parameters
+        completion = client.chat.completions.create(
+            model="assistantPreviewSaturday",
+            messages=message_text,
+            temperature=0.7,
+            max_tokens=800,
+            top_p=0.95,
+            frequency_penalty=0,
+            presence_penalty=0,
+            stop=None
+        )
+
+        # Convert the completion object to a string for manual parsing
+        completion_str = str(completion)
+
+        # Manual parsing to find the content after 'message=ChatCompletionMessage(content='
+        start_marker = "message=ChatCompletionMessage(content='"
+        end_marker = "', role='assistant'"
+
+        start_pos = completion_str.find(start_marker)
+        if (start_pos != -1):
+            start_pos += len(start_marker)
+            end_pos = completion_str.find(end_marker, start_pos)
+            if (end_pos != -1):
+                # Extract the message content
+                message_content = completion_str[start_pos:end_pos]
+                return message_content
+            else:
+                return "End marker not found."
+        else:
+            return "Start marker not found."
+
+    except Exception as e:
+        print(f"Error making API call: {e}")
+        return f"Error: {str(e)}"
+
+if __name__ == '__main__':
+    app.run(port=5000, debug=True)
+</code></pre>
+
+<p>In this code:</p>
+<ul>
+    <li>We initialize the AzureOpenAI client with environment variables.</li>
+    <li>The <code>inst</code> variable contains the system message for the AI assistant.</li>
+    <li>The <code>chat</code> endpoint is defined to handle POST requests and fetch responses from the OpenAI API.</li>
+    <li>The <code>get_chatgpt_response</code> function is responsible for communicating with the OpenAI API and extracting the response content.</li>
+</ul>
+
+<h2>Modified `basic.js`</h2>
+<p>Next, we modify the <code>basic.js</code> file to fetch responses from the OpenAI API and pass them to the avatar.</p>
+
+<p>Original <code>speak</code> function:</p>
+
+<pre><code>window.speak = () => {
+    document.getElementById('speak').disabled = true;
+    document.getElementById('stopSpeaking').disabled = false
+    document.getElementById('audio').muted = false
+    let spokenText = document.getElementById('spokenText').value
+    let ttsVoice = document.getElementById('ttsVoice').value
+    let personalVoiceSpeakerProfileID = document.getElementById('personalVoiceSpeakerProfileID').value
+    let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(spokenText)}</mstts:ttsembedding></voice></speak>`
+    console.log("[" + (new Date()).toISOString() + "] Speak request sent.")
+    avatarSynthesizer.speakSsmlAsync(spokenSsml).then(
+        (result) => {
+            document.getElementById('speak').disabled = false
+            document.getElementById('stopSpeaking').disabled = true
+            if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
+                console.log("[" + (new Date()).toISOString() + "] Speech synthesized to speaker for text [ " + spokenText + " ]. Result ID: " + result.resultId)
+            } else {
+                console.log("[" + (new Date()).toISOString() + "] Unable to speak text. Result ID: " + result.resultId)
+                if (result.reason === SpeechSDK.ResultReason.Canceled) {
+                    let cancellationDetails = SpeechSDK.CancellationDetails.fromResult(result)
+                    console.log(cancellationDetails.reason)
+                    if (cancellationDetails.reason === SpeechSDK.CancellationReason.Error) {
+                        console.log(cancellationDetails.errorDetails)
+                    }
+                }
+            }
+        }).catch(log);
+}
+</code></pre>
+
+<p>Updated <code>basic.js</code> to use OpenAI API:</p>
+
+<pre><code>function fetchChatGPTResponse(spokenText) {
+    fetch('http://localhost:5000/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: spokenText })
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Received data:", data); // Log the received data
+            if (data.response) {
+                document.getElementById('apiResponse').value = data.response;
+                originalSpeakFunction(data.response);
+            } else {
+                throw new Error('No response data found or unexpected structure.');
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            alert('Error: ' + error.message);
+        });
+}
+
+function originalSpeakFunction(responseText) {
+    document.getElementById('speak').disabled = true;
+    document.getElementById('stopSpeaking').disabled = false
+    document.getElementById('audio').muted = false
+
+    // Prepare spoken text by replacing \n with a space for SSML
+    let spokenText = responseText.replace(/\n/g, ' '); // Replace newline characters with spaces for SSML
+
+    //let spokenText = responseText
+    let ttsVoice = document.getElementById('ttsVoice').value
+    let personalVoiceSpeakerProfileID = document.getElementById('personalVoiceSpeakerProfileID').value
+    let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(spokenText)}</mstts:ttsembedding></voice></speak>`
+    console.log("[" + (new Date()).toISOString() + "] Speak request sent.")
+    avatarSynthesizer.speakSsmlAsync(spokenSsml).then(
+        (result) => {
+            document.getElementById('speak').disabled = false
+            document.getElementById('stopSpeaking').disabled = true
+            if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
+                console.log("[" + (new Date()).toISOString() + "] Speech synthesized to speaker for text [ " + spokenText + " ]. Result ID: " + result.resultId)
+            } else {
+                console.log("[" + (new Date()).toISOString() + "] Unable to speak text. Result ID: " + result.resultId)
+                if (result.reason === SpeechSDK.ResultReason.Canceled) {
+                    let cancellationDetails = SpeechSDK.CancellationDetails.fromResult(result)
+                    console.log(cancellationDetails.reason)
+                    if (cancellationDetails.reason === SpeechSDK.CancellationReason.Error) {
+                        console.log(cancellationDetails.errorDetails)
+                    }
+                }
+            }
+        }).catch(log);
+}
+
+window.speak = () => {
+    let spokenText = document.getElementById('spokenText').value;
+    fetchChatGPTResponse(spokenText);  // Fetch ChatGPT response
+};
+</code></pre>
+
+<p>In this updated code:</p>
+<ul>
+    <li>The <code>fetchChatGPTResponse</code> function sends the user's input to the OpenAI API and handles the response.</li>
+    <li>The <code>originalSpeakFunction</code> function is called with the response from the API to synthesize speech using the avatar.</li>
+    <li>The <code>speak</code> function now calls <code>fetchChatGPTResponse</code> instead of directly synthesizing speech.</li>
+</ul>
+
+<h2>Changes in `basic.html`</h2>
+<p>We also made changes to the <code>basic.html</code> file to include additional elements and update the UI.</p>
+
+<ul>
+    <li>Updated the button label from "Speak" to "Submit Question".</li>
+    <li>Added a new textarea element to display the avatar's response (<code>apiResponse</code>).</li>
+    <li>Adjusted some of the wording and layout to better suit the updated functionality.</li>
+</ul>
+
+
+<h2>Running the Integration</h2>
+<p>To run the integration and interact with the virtual avatar using the OpenAI API, follow these steps:</p>
+
+<ol>
+    <li>
+        <strong>Run Flask in the Background:</strong>
+        <pre><code>flask run</code></pre>
+    </li>
+    <li>
+        <strong>Open the Updated <code>basic.html</code> Page:</strong>
+        <p>Open the updated <code>basic.html</code> page in your browser. Provide the necessary credentials, including the Azure key, region, and subscription key. Connect to the avatar by clicking the <strong>Start Session</strong> button.</p>
+    </li>
+    <li>
+        <strong>Submit Your Question:</strong>
+        <p>Write your question in the provided text box and click the <strong>Submit Question</strong> button. After 1-2 seconds, you will see a response in the text box below the avatar, and the avatar will speak the response to you.</p>
+    </li>
+</ol>
+
+<p>End of documentation.</p>
+
+<div style="text-align: right; margin-top: 20px;">
+    <button onclick="location.href='doc.html'" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Back to Documentation Page 1</button>
+</div>
+
+
+</body>
+</html>

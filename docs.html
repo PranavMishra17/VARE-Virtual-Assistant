@@ -33,9 +33,23 @@
         code {
             font-family: "Courier New", Courier, monospace;
         }
+        .button-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .button-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+
+<div class="button-container">
+    <button onclick="location.href='doc2.html'">Go to Documentation Page 2</button>
+</div>
 
 <h1>Documentation for Custom Azure Avatar with Knowledge Base via OpenAI API</h1>
 
@@ -158,6 +172,8 @@ if __name__ == '__main__':
     </li>
     <li>
         <strong>Run the Flask Application:</strong>
+        <pre><code>flask run</code></pre>
+        After running flask, open a separate anaconda command prompt and navigate to the python file directory to run the file:
         <pre><code>python sampleGPT.py</code></pre>
         <p>When prompted, write a question such as "Who are you?" or "Tell me about the lab's best projects" and press Enter. The command prompt will fetch and print the API response.</p>
     </li>
@@ -180,7 +196,7 @@ if __name__ == '__main__':
     </li>
     <li>
         <strong>Set Up the Speech SDK:</strong>
-        <p>In the same directory, install or unzip the Speech SDK: <code>SpeechSDK-JavaScript-1.36.0</code>. Find the same or the latest version for free.</p>
+        <p>In the same directory, install or unzip the Speech SDK: <code>SpeechSDK-JavaScript-1.36.0</code>. Find the same or the latest version for free. <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-sdk" target="_blank">SDK</a></p>
     </li>
     <li>
         <strong>Run Flask and Open the Website:</strong>
@@ -192,6 +208,11 @@ if __name__ == '__main__':
 </ol>
 
 <p><strong>Note:</strong> This website is the default as given on GitHub. It does not have conversation capabilities. The avatar will only speak what you write in the text box. In the next steps, we will change the HTML and JavaScript code to add our OpenAI model for conversation capabilities.</p>
+
+<div style="text-align: right; margin-top: 20px;">
+    <button onclick="location.href='doc2.html'" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Go to Documentation Page 2</button>
+</div>
+
 
 </body>
 </html>
