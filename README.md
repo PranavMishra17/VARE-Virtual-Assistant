@@ -1,2 +1,3 @@
 # VARE Virtual Avatar
  
+Implemented Azure's Text-to-Speech model on our lab website to create a real-time talking avatar, leveraging Azure and OpenAI models for enhanced interactivity. Modified JavaScript code to integrate OpenAI for conversational capabilities, beyond Azure's basic text-to-speech. The integration involved setting up a server with Python scripts to connect the APIs, enabling dynamic conversations with the avatar. Additionally, we recorded and utilized a custom avatar with support from Microsoft, enhancing the website's research functionalities. The project is ongoing, with further improvements underway.
